@@ -1,19 +1,20 @@
-import pygame
+import pygame as pg
 import sys
 
+from game_board import GameBoard
 
-pygame.init()
+
+pg.init()
 
 # Tamanho Window
 WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-
+screen = pg.display.set_mode((WIDTH, HEIGHT))
 
 # Text Colors
 BLACK = (0, 0, 0)
 YELLOW = (255, 255, 0)
 
-font = pygame.font.SysFont('Arial', 36)
+font = pg.font.SysFont('Arial', 36)
 
 
 
@@ -29,43 +30,59 @@ for i,choice in enumerate(menu_possibilities):
     option_positions.append(text_position)
 
 
-concept_image = pygame.image.load("images/concept.png")
-concept_image = pygame.transform.scale(concept_image, (WIDTH, HEIGHT))
+concept_image = pg.image.load("images/concept.png")
+concept_image = pg.transform.scale(concept_image, (WIDTH, HEIGHT))
 
-intro_image = pygame.image.load("images/intro.png")
-intro_image = pygame.transform.scale(intro_image,(WIDTH,HEIGHT))
+intro_image = pg.image.load("images/intro.png")
+intro_image = pg.transform.scale(intro_image,(WIDTH,HEIGHT))
 
 continue_text = font.render("Press any key to continue", True, YELLOW)
 continue_text_rect = continue_text.get_rect(center=(WIDTH // 2, HEIGHT - 200))
 
 INTRO = 0
 MENU = 1
+PLAYING = 2
 CONCEPT_DISPLAY = 3
 state = INTRO
 
 
+# Create a GameBoard instance
+grid_size = 4  # You can adjust the grid size as needed
+game_board = GameBoard(WIDTH, HEIGHT, grid_size)
+
 def handle_events():
     global state
-    for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
+    for event in pg.event.get():
+        if event.type == pg.KEYDOWN:
             if state == INTRO:
                 state = MENU
             elif state == MENU:
-                if event.key == pygame.K_1:
-                    print("Starting Amado...") #debug
-                elif event.key == pygame.K_2:
+                if event.key == pg.K_1:
+                    state = PLAYING
+                    game_board.start_timer()
+
+                elif event.key == pg.K_2:
                     print("Launching Discovery...") #debug
-                elif event.key == pygame.K_3:
+                    #Ainda estou a pensar se vale a pena na verdade incluir este step so se for mais numa de 
+                    #Board testing
+                    
+                elif event.key == pg.K_3:
                     print("Exploring Concept...") #debug
                     state = CONCEPT_DISPLAY
-                elif event.key == pygame.K_4:
-                    pygame.quit()
+                elif event.key == pg.K_4:
+                    pg.quit()
                     sys.exit()
             elif state == CONCEPT_DISPLAY:
-                    state = MENU
+                state = MENU
+            elif state == PLAYING:
+                if event.key == pg.K_ESCAPE:
+                    state = MENU 
 
-def update_display():
-    screen.fill(BLACK)
+
+while True:
+    handle_events()  # Handle events such as key presses
+
+    screen.fill(BLACK)  # Clear the screen
     if state == INTRO:
         screen.blit(intro_image, (0, 0))
         screen.blit(continue_text, continue_text_rect)
@@ -74,9 +91,10 @@ def update_display():
             screen.blit(surface, position)
     elif state == CONCEPT_DISPLAY:
         screen.blit(concept_image, (0, 0))
-    pygame.display.flip()
+    elif state == PLAYING:
+        game_board.render(screen,grid_size)
+        game_board.render_end_grid(screen)
+        game_board.render_move_counter(screen)
+        game_board.render_clock(screen)
 
-
-while True:
-    handle_events()
-    update_display()
+    pg.display.flip()

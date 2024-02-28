@@ -16,8 +16,6 @@ YELLOW = (255, 255, 0)
 
 font = pg.font.SysFont('Arial', 36)
 
-
-
 menu_possibilities = ["1. A M A D O", "2. Discovery", "3. Concept", "4. Quit"]
 option_surfaces = []
 option_positions = []
@@ -65,7 +63,7 @@ def handle_events():
                     print("Launching Discovery...") #debug
                     #Ainda estou a pensar se vale a pena na verdade incluir este step so se for mais numa de 
                     #Board testing
-                    
+
                 elif event.key == pg.K_3:
                     print("Exploring Concept...") #debug
                     state = CONCEPT_DISPLAY

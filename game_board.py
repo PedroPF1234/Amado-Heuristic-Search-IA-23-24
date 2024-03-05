@@ -19,6 +19,8 @@ class GameBoard:
         self.counter = 0
         self.start_time = None
         self.position = (0,0)
+        self.color = [RED, BLUE, YELLOW]
+
         # Vai faltar adicionar o end time para contabilizar tempo demorado ou entao actually tira-se o elapsed time
 
 
@@ -161,14 +163,35 @@ class GameBoard:
         screen.blit(counter_text, counter_rect)
 
 
-
     def game_moves(self, event):
         if event.type == pg.KEYDOWN:
-            if event.key == pg.K_UP and self.position[1] > 0:
-                self.position = (self.position[0], self.position[1] - 1)
-            elif event.key == pg.K_DOWN and self.position[1] < self.grid_size - 1:
-                self.position = (self.position[0], self.position[1] + 1)
-            elif event.key == pg.K_LEFT and self.position[0] > 0:
-                self.position = (self.position[0] - 1, self.position[1])
-            elif event.key == pg.K_RIGHT and self.position[0] < self.grid_size - 1:
-                self.position = (self.position[0] + 1, self.position[1])
+            x, y = self.position
+            current_cell_color = self.playablegrid[y][x]
+            
+            if event.key == pg.K_UP and y > 0:
+                new_position = (x, y - 1)
+            elif event.key == pg.K_DOWN and y < self.grid_size - 1:
+                new_position = (x, y + 1)
+            elif event.key == pg.K_LEFT and x > 0:
+                new_position = (x - 1, y)
+            elif event.key == pg.K_RIGHT and x < self.grid_size - 1:
+                new_position = (x + 1, y)
+
+            if new_position:
+                destination_color = self.playablegrid[new_position[1]][new_position[0]]
+                if destination_color == current_cell_color:
+                    self.position = new_position 
+                else:
+                    self.playablegrid[new_position[1]][new_position[0]] = self.get_transformed_color(current_cell_color, destination_color)
+                    self.position = new_position
+
+
+
+    def get_transformed_color(self, current_color, destination_color):
+        for color in self.color:
+            if color != current_color and color != destination_color:
+                return color
+        return current_color
+
+
+

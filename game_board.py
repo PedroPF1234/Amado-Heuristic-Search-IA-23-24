@@ -18,7 +18,21 @@ class GameBoard:
         self.endgrid = self.generate_end_grid()
         self.counter = 0
         self.start_time = None
+        self.position = (0,0)
         # Vai faltar adicionar o end time para contabilizar tempo demorado ou entao actually tira-se o elapsed time
+
+
+    def render_position(self, screen):
+        cell_width = 100
+        cell_height = 50
+        border_width = 2 
+        start_x = 75
+        start_y = 275
+
+        position_x = start_x + self.position[0] * (cell_width + border_width)
+        position_y = start_y + self.position[1] * (cell_height + border_width)
+        
+        pg.draw.rect(screen, (255, 165, 0), (position_x, position_y, cell_width, cell_height), 2)
 
 
     def start_timer(self):
@@ -115,6 +129,8 @@ class GameBoard:
             vertical_bar_x = 500
             vertical_bar_y = 0
             pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
+            self.render_position(screen)
+
 
     def render_end_grid(self, screen):
         if self.grid_size == 4:
@@ -146,3 +162,13 @@ class GameBoard:
 
 
 
+    def game_moves(self, event):
+        if event.type == pg.KEYDOWN:
+            if event.key == pg.K_UP and self.position[1] > 0:
+                self.position = (self.position[0], self.position[1] - 1)
+            elif event.key == pg.K_DOWN and self.position[1] < self.grid_size - 1:
+                self.position = (self.position[0], self.position[1] + 1)
+            elif event.key == pg.K_LEFT and self.position[0] > 0:
+                self.position = (self.position[0] - 1, self.position[1])
+            elif event.key == pg.K_RIGHT and self.position[0] < self.grid_size - 1:
+                self.position = (self.position[0] + 1, self.position[1])

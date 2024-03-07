@@ -18,7 +18,23 @@ class GameBoard:
         self.endgrid = self.generate_end_grid()
         self.counter = 0
         self.start_time = None
+        self.position = (0,0)
+        self.color = [RED, BLUE, YELLOW]
+
         # Vai faltar adicionar o end time para contabilizar tempo demorado ou entao actually tira-se o elapsed time
+
+
+    def render_position(self, screen):
+        cell_width = 100
+        cell_height = 50
+        border_width = 2 
+        start_x = 75
+        start_y = 275
+
+        position_x = start_x + self.position[0] * (cell_width + border_width)
+        position_y = start_y + self.position[1] * (cell_height + border_width)
+        
+        pg.draw.rect(screen, (255, 165, 0), (position_x, position_y, cell_width, cell_height), 2)
 
 
     def start_timer(self):
@@ -115,6 +131,8 @@ class GameBoard:
             vertical_bar_x = 500
             vertical_bar_y = 0
             pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
+            self.render_position(screen)
+
 
     def render_end_grid(self, screen):
         if self.grid_size == 4:
@@ -143,6 +161,37 @@ class GameBoard:
         counter_text = font.render(f"Moves: {self.counter}", True, WHITE)
         counter_rect = counter_text.get_rect(topleft=(10, 10))
         screen.blit(counter_text, counter_rect)
+
+
+    def game_moves(self, event):
+        if event.type == pg.KEYDOWN:
+            x, y = self.position
+            current_cell_color = self.playablegrid[y][x]
+            
+            if event.key == pg.K_UP and y > 0:
+                new_position = (x, y - 1)
+            elif event.key == pg.K_DOWN and y < self.grid_size - 1:
+                new_position = (x, y + 1)
+            elif event.key == pg.K_LEFT and x > 0:
+                new_position = (x - 1, y)
+            elif event.key == pg.K_RIGHT and x < self.grid_size - 1:
+                new_position = (x + 1, y)
+
+            if new_position:
+                destination_color = self.playablegrid[new_position[1]][new_position[0]]
+                if destination_color == current_cell_color:
+                    self.position = new_position 
+                else:
+                    self.playablegrid[new_position[1]][new_position[0]] = self.get_transformed_color(current_cell_color, destination_color)
+                    self.position = new_position
+
+
+
+    def get_transformed_color(self, current_color, destination_color):
+        for color in self.color:
+            if color != current_color and color != destination_color:
+                return color
+        return current_color
 
 
 

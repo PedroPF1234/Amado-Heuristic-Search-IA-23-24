@@ -44,8 +44,8 @@ CONCEPT_DISPLAY = 3
 state = INTRO
 
 
-# Create a GameBoard instance
-grid_size = 4  # You can adjust the grid size as needed
+
+grid_size = 4  
 game_board = GameBoard(WIDTH, HEIGHT, grid_size)
 
 def handle_events():
@@ -74,13 +74,15 @@ def handle_events():
                 state = MENU
             elif state == PLAYING:
                 if event.key == pg.K_ESCAPE:
-                    state = MENU 
+                    state = MENU
+                game_board.game_moves(event) 
+
+
 
 
 while True:
-    handle_events()  # Handle events such as key presses
-
-    screen.fill(BLACK)  # Clear the screen
+    handle_events()
+    screen.fill(BLACK)
     if state == INTRO:
         screen.blit(intro_image, (0, 0))
         screen.blit(continue_text, continue_text_rect)
@@ -94,5 +96,4 @@ while True:
         game_board.render_end_grid(screen)
         game_board.render_move_counter(screen)
         game_board.render_clock(screen)
-
     pg.display.flip()

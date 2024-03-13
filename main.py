@@ -60,6 +60,8 @@ def handle_events():
             elif state == MENU:
                 if event.key == pg.K_1:
                     state = PLAYING
+                    game_board.reset_game_state()
+
                     game_board.start_timer()
 
                 elif event.key == pg.K_2:
@@ -81,20 +83,23 @@ def handle_events():
                 game_board.game_moves(event) 
                 if game_board.end_condition_check():
                     state = END_GAME
+                    game_board.stop_timer()
 
 
 
 
 while True:
     if state == END_GAME:
+
         for event in pg.event.get():
+        
             end_state_event_result = end_state.handle_end_state_events(event)
             if end_state_event_result == 'main_menu':
                 state = MENU
             elif end_state_event_result == 'quit':
                 pg.quit()
                 sys.exit()
-        end_state.render_end_screen(screen)
+        end_state.render_end_screen(screen, game_board.counter, game_board.get_elapsed_time())
     else:
         handle_events()  # Handle events for other states
         screen.fill(BLACK)

@@ -1,5 +1,6 @@
 import pygame as pg
 import sys
+import end_state
 
 from game_board import GameBoard
 
@@ -41,7 +42,9 @@ INTRO = 0
 MENU = 1
 PLAYING = 2
 CONCEPT_DISPLAY = 3
+END_GAME = 4
 state = INTRO
+game_over = False
 
 
 
@@ -77,25 +80,35 @@ def handle_events():
                     state = MENU
                 game_board.game_moves(event) 
                 if game_board.end_condition_check():
-                    state = MENU
+                    state = END_GAME
 
 
 
 
 while True:
-    handle_events()
-    screen.fill(BLACK)
-    if state == INTRO:
-        screen.blit(intro_image, (0, 0))
-        screen.blit(continue_text, continue_text_rect)
-    elif state == MENU:
-        for surface, position in zip(option_surfaces, option_positions):
-            screen.blit(surface, position)
-    elif state == CONCEPT_DISPLAY:
-        screen.blit(concept_image, (0, 0))
-    elif state == PLAYING:
-        game_board.render(screen,grid_size)
-        game_board.render_end_grid(screen)
-        game_board.render_move_counter(screen)
-        game_board.render_clock(screen)
+    if state == END_GAME:
+        for event in pg.event.get():
+            end_state_event_result = end_state.handle_end_state_events(event)
+            if end_state_event_result == 'main_menu':
+                state = MENU
+            elif end_state_event_result == 'quit':
+                pg.quit()
+                sys.exit()
+        end_state.render_end_screen(screen)
+    else:
+        handle_events()  # Handle events for other states
+        screen.fill(BLACK)
+        if state == INTRO:
+            screen.blit(intro_image, (0, 0))
+            screen.blit(continue_text, continue_text_rect)
+        elif state == MENU:
+            for surface, position in zip(option_surfaces, option_positions):
+                screen.blit(surface, position)
+        elif state == CONCEPT_DISPLAY:
+            screen.blit(concept_image, (0, 0))
+        elif state == PLAYING:
+            game_board.render(screen,grid_size)
+            game_board.render_end_grid(screen)
+            game_board.render_move_counter(screen)
+            game_board.render_clock(screen)
     pg.display.flip()

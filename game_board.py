@@ -203,5 +203,5 @@ class GameBoard:
         for i in range(self.grid_size):
             for j in range(self.grid_size):
                 if self.playablegrid[i][j] != self.endgrid[i][j]:
-                    return False  # If any cell doesn't match, return False
-        return True  # All cells match, return True indicating game won
+                    return False  
+        return True

@@ -18,10 +18,11 @@ class GameBoard:
         self.endgrid = self.generate_end_grid()
         self.counter = 0
         self.start_time = None
+        self.end_time = None
+
         self.position = (0,0)
         self.color = [RED, BLUE, YELLOW]
 
-        # Vai faltar adicionar o end time para contabilizar tempo demorado ou entao actually tira-se o elapsed time
 
 
     def render_position(self, screen):
@@ -40,10 +41,17 @@ class GameBoard:
     def start_timer(self):
         self.start_time = time.time()
 
+    def stop_timer(self):
+        self.end_time = time.time()
+
     def get_elapsed_time(self):
         if self.start_time is not None:
-            elapsed_time = time.time() - self.start_time
-            return elapsed_time
+            if self.end_time is not None:
+                elapsed_time = self.end_time - self.start_time
+                return elapsed_time
+            else:
+                elapsed_time = time.time() - self.start_time
+                return elapsed_time
         else:
             return 0
 
@@ -185,9 +193,13 @@ class GameBoard:
                     destination_color = self.playablegrid[new_y][new_x]
                     if destination_color == current_cell_color:
                         self.position = new_position
+                        self.move_counter()
+
                     else:
                         self.playablegrid[new_y][new_x] = self.get_transformed_color(current_cell_color, destination_color)
                         self.position = new_position 
+                        self.move_counter()
+
 
 
 

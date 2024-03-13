@@ -224,4 +224,6 @@ class GameBoard:
         self.endgrid = self.generate_end_grid()
         self.counter = 0
         self.start_time = None
+        self.end_time = None
+
         self.position = (0, 0)

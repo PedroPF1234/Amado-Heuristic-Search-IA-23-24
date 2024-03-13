@@ -217,3 +217,11 @@ class GameBoard:
                 if self.playablegrid[i][j] != self.endgrid[i][j]:
                     return False  
         return True
+    
+
+    def reset_game_state(self):
+        self.playablegrid = self.generate_random_grid(self.grid_size)
+        self.endgrid = self.generate_end_grid()
+        self.counter = 0
+        self.start_time = None
+        self.position = (0, 0)

@@ -60,6 +60,8 @@ def handle_events():
             elif state == MENU:
                 if event.key == pg.K_1:
                     state = PLAYING
+                    game_board.reset_game_state()
+
                     game_board.start_timer()
 
                 elif event.key == pg.K_2:

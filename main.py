@@ -76,6 +76,8 @@ def handle_events():
                 if event.key == pg.K_ESCAPE:
                     state = MENU
                 game_board.game_moves(event) 
+                if game_board.end_condition_check():
+                    state = MENU
 
 
 

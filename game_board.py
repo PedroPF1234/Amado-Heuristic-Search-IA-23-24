@@ -199,3 +199,9 @@ class GameBoard:
 
 
 
+    def end_condition_check(self):
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                if self.playablegrid[i][j] != self.endgrid[i][j]:
+                    return False  
+        return True

@@ -277,7 +277,7 @@ class GameBoard:
     
     def basic_bfs_search(self):
         
-        visited = []
+        visited = set()
 
         queue = deque()
         queue.append((0, 0, self.playablegrid, 0))
@@ -286,12 +286,13 @@ class GameBoard:
             if self.search_end_condition_check(current[2]):
                 return True
             
-            x, y, grid = current[0], current[1], current[2]
+            x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
             if state not in visited:
-                visited.append(state)
+                visited.add(state)
                 for neighbor in self.get_neighbors(current):
-                    if neighbor not in visited:
+                    neighbor_ = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
+                    if neighbor_ not in visited:
                         queue.append(neighbor)
         return False
 

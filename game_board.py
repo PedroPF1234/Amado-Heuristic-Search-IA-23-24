@@ -3,6 +3,7 @@ import pygame as pg
 import random
 import time
 from collections import deque
+import heapq
 
 
 RED = (255, 0, 0)
@@ -142,6 +143,36 @@ class GameBoard:
             pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
             self.render_position(screen)
 
+    #Temporary function
+    def render_search(self, screen, grid_size, grid):
+        if grid_size == 4:
+            cell_width = 100
+            cell_height = 50
+            border_width = 2 
+
+            start_x = 75  #Horizontal
+            start_y = 275  #Vertical
+
+            for row in range(self.grid_size):
+                for col in range(self.grid_size):
+                    cell_color = grid[row][col]
+                    cell_x = start_x + col * (cell_width + border_width)  
+                    cell_y = start_y + row * (cell_height + border_width)  
+
+
+                    cell_rect = pg.Rect(cell_x, cell_y, cell_width, cell_height) 
+                    pg.draw.rect(screen, (255, 255, 255), cell_rect) # Pygame desenhar bordas
+                    cell_inner_rect = pg.Rect(cell_x + border_width // 2, cell_y + border_width // 2,
+                                            cell_width - border_width, cell_height - border_width)
+                    pg.draw.rect(screen, cell_color, cell_inner_rect)
+
+            #Separador do amado
+            vertical_bar_width = 10
+            vertical_bar_height = 600
+            vertical_bar_x = 500
+            vertical_bar_y = 0
+            pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
+            self.render_position(screen)
 
     def render_end_grid(self, screen):
         if self.grid_size == 4:
@@ -295,5 +326,41 @@ class GameBoard:
                     if neighbor_ not in visited:
                         queue.append(neighbor)
         return False
+    
+    #Calculates the number of matching tiles between the current grid and the end grid
+    def calculate_matching_tiles(self, grid):
+        matching_tiles = 0
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                if grid[i][j] == self.endgrid[i][j]:
+                    matching_tiles += 1
+        return matching_tiles
+
+    def greedy_bfs_search(self):
+        print("Greedy BFS Search")
+        visited = set()
+        queue = []
+        
+        initial_info = (0, 0, self.playablegrid, 0)
+        initial_priority = -self.calculate_matching_tiles(self.playablegrid)  # Negated to make heapq a max-heap
+        heapq.heappush(queue, (initial_priority, initial_info))
+        
+        while queue:
+            print("Before check")
+            _, current = heapq.heappop(queue)
+            if self.search_end_condition_check(current[2]):
+                self.counter = current[3]
+                return current[2]
+            print("After check")
+            x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
+            state = (x, y, grid)
+            if state not in visited:
+                visited.add(state)
+                for neighbor in self.get_neighbors(current):
+                    neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
+                    if neighbor_state not in visited:
+                        priority = -self.calculate_matching_tiles(neighbor[2])
+                        heapq.heappush(queue, (priority, neighbor))
+        return None
 
 

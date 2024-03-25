@@ -1,6 +1,7 @@
 import pygame as pg
 import sys
 import end_state
+import time
 
 from game_board import GameBoard
 
@@ -71,12 +72,14 @@ def handle_events():
                     game_board.start_timer()
                     
                     print("Searching for solution...")
-                    if game_board.basic_bfs_search():
-                        print("Solution found")
-                        state = END_GAME
-                        game_board.stop_timer()
-                    else:
-                        print("No solution found")
+                    game_board.render_search(screen,grid_size, game_board.greedy_bfs_search())
+                    game_board.render_end_grid(screen)
+                    pg.display.flip()
+                    time.sleep(10)
+                    state = END_GAME
+                    game_board.stop_timer()
+                    #else:
+                        #print("No solution found")
 
                 elif event.key == pg.K_3:
                     print("Exploring Concept...") #debug

@@ -2,6 +2,7 @@
 import pygame as pg
 import random
 import time
+from collections import deque
 
 
 RED = (255, 0, 0)
@@ -227,3 +228,71 @@ class GameBoard:
         self.end_time = None
 
         self.position = (0, 0)
+
+
+    def get_neighbors(self, info):
+        x, y, grid, counter = info
+        current_cell_color = grid[y][x]
+        neighbors = []
+        if x > 0:
+            destination_color =  grid[x-1][y]
+            if destination_color == current_cell_color:
+                neighbors.append((x - 1, y, grid, counter + 1))
+            else:
+                new_grid = [row[:] for row in grid]
+                new_grid[x-1][y] = self.get_transformed_color(current_cell_color, destination_color)
+                neighbors.append((x - 1, y, new_grid, counter + 1))
+        if x < len(self.playablegrid) - 1:
+            destination_color = grid[x+1][y]
+            if destination_color == current_cell_color:
+                neighbors.append((x + 1, y, grid, counter + 1))
+            else:
+                new_grid = [row[:] for row in grid]
+                new_grid[x+1][y] = self.get_transformed_color(current_cell_color, destination_color)
+                neighbors.append((x + 1, y, new_grid, counter + 1))
+        if y > 0:
+            destination_color = grid[x][y-1]
+            if destination_color == current_cell_color:
+                neighbors.append((x, y - 1, grid, counter + 1))
+            else:
+                new_grid = [row[:] for row in grid]
+                new_grid[x][y-1] = self.get_transformed_color(current_cell_color, destination_color)
+                neighbors.append((x, y - 1, new_grid, counter + 1))
+        if y < len(self.playablegrid) - 1:
+            destination_color = grid[x][y+1]
+            if destination_color == current_cell_color:
+                neighbors.append((x, y + 1, grid, counter + 1))
+            else:
+                new_grid = [row[:] for row in grid]
+                new_grid[x][y+1] = self.get_transformed_color(current_cell_color, destination_color)
+                neighbors.append((x, y + 1, new_grid, counter + 1))
+        return neighbors
+    
+    def search_end_condition_check(self, grid):
+        for i in range(self.grid_size):
+            for j in range(self.grid_size):
+                if grid[i][j] != self.endgrid[i][j]:
+                    return False
+        return True
+    
+    def basic_bfs_search(self):
+        
+        visited = []
+
+        queue = deque()
+        queue.append((0, 0, self.playablegrid, 0))
+        while queue:
+            current = queue.popleft()
+            if self.search_end_condition_check(current[2]):
+                return True
+            
+            x, y, grid = current[0], current[1], current[2]
+            state = (x, y, grid)
+            if state not in visited:
+                visited.append(state)
+                for neighbor in self.get_neighbors(current):
+                    if neighbor not in visited:
+                        queue.append(neighbor)
+        return False
+
+

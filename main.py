@@ -43,6 +43,7 @@ MENU = 1
 PLAYING = 2
 CONCEPT_DISPLAY = 3
 END_GAME = 4
+SEARCH_PLAYING = 5
 state = INTRO
 game_over = False
 
@@ -65,9 +66,17 @@ def handle_events():
                     game_board.start_timer()
 
                 elif event.key == pg.K_2:
-                    print("Launching Discovery...") #debug
-                    #Ainda estou a pensar se vale a pena na verdade incluir este step so se for mais numa de 
-                    #Board testing
+                    state = SEARCH_PLAYING
+                    game_board.reset_game_state()
+                    game_board.start_timer()
+                    
+                    print("Searching for solution...")
+                    if game_board.basic_bfs_search():
+                        print("Solution found")
+                        state = END_GAME
+                        game_board.stop_timer()
+                    else:
+                        print("No solution found")
 
                 elif event.key == pg.K_3:
                     print("Exploring Concept...") #debug
@@ -84,6 +93,10 @@ def handle_events():
                 if game_board.end_condition_check():
                     state = END_GAME
                     game_board.stop_timer()
+
+            elif state == SEARCH_PLAYING:
+                if event.key == pg.K_ESCAPE:
+                    state = MENU 
 
 
 

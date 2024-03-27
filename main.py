@@ -72,7 +72,14 @@ def handle_events():
                     game_board.start_timer()
                     
                     print("Searching for solution...")
+                    previous_board = game_board.playablegrid
+                    game_board.render_search(screen,grid_size, game_board.a_star_search())
+                    
+                    game_board.playablegrid = previous_board
+                    game_board.counter = 0
+                    
                     game_board.render_search(screen,grid_size, game_board.greedy_bfs_search())
+
                     game_board.render_end_grid(screen)
                     pg.display.flip()
                     time.sleep(10)

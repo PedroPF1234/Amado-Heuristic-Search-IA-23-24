@@ -327,14 +327,14 @@ class GameBoard:
                         queue.append(neighbor)
         return False
     
-    #Calculates the number of matching tiles between the current grid and the end grid
-    def calculate_matching_tiles(self, grid):
-        matching_tiles = 0
+    #Calculates the number of non matching tiles between the current grid and the end grid
+    def calculate_unmatching_tiles(self, grid):
+        unmatching_tiles = 0
         for i in range(self.grid_size):
             for j in range(self.grid_size):
-                if grid[i][j] == self.endgrid[i][j]:
-                    matching_tiles += 1
-        return matching_tiles
+                if grid[i][j] != self.endgrid[i][j]:
+                    unmatching_tiles += 1
+        return unmatching_tiles
 
     def greedy_bfs_search(self):
         print("Greedy BFS Search")
@@ -342,16 +342,16 @@ class GameBoard:
         queue = []
         
         initial_info = (0, 0, self.playablegrid, 0)
-        initial_priority = -self.calculate_matching_tiles(self.playablegrid)  # Negated to make heapq a max-heap
+        initial_priority = self.calculate_unmatching_tiles(self.playablegrid)
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
-            print("Before check")
             _, current = heapq.heappop(queue)
             if self.search_end_condition_check(current[2]):
                 self.counter = current[3]
+                print("Counter: ", self.counter)
                 return current[2]
-            print("After check")
+            
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
             if state not in visited:
@@ -359,8 +359,34 @@ class GameBoard:
                 for neighbor in self.get_neighbors(current):
                     neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
                     if neighbor_state not in visited:
-                        priority = -self.calculate_matching_tiles(neighbor[2])
+                        priority = self.calculate_unmatching_tiles(neighbor[2])
                         heapq.heappush(queue, (priority, neighbor))
         return None
 
+    def a_star_search(self):
+        print("A* Search")
+        visited = set()
+        queue = []
+        
+        initial_info = (0, 0, self.playablegrid, 0)
+        initial_priority = self.calculate_unmatching_tiles(self.playablegrid)
+        heapq.heappush(queue, (initial_priority, initial_info))
+        
+        while queue:
+            _, current = heapq.heappop(queue)
+            if self.search_end_condition_check(current[2]):
+                self.counter = current[3]
+                print("Counter: ", self.counter)
+                return current[2]
+            
+            x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
+            state = (x, y, grid)
+            if state not in visited:
+                visited.add(state)
+                for neighbor in self.get_neighbors(current):
+                    neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
+                    if neighbor_state not in visited:
+                        priority = self.calculate_unmatching_tiles(neighbor[2]) + neighbor[3]
+                        heapq.heappush(queue, (priority, neighbor))
+        return None
 

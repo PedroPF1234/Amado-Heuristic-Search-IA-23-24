@@ -69,16 +69,17 @@ def handle_events():
                 elif event.key == pg.K_2:
                     state = SEARCH_PLAYING
                     game_board.reset_game_state()
+                    initial_info = (0, 0, game_board.playablegrid, 0)
                     game_board.start_timer()
                     
                     print("Searching for solution...")
-                    previous_board = game_board.playablegrid
-                    game_board.render_search(screen,grid_size, game_board.a_star_search())
+                    game_board.render_search(screen,grid_size, game_board.a_star_search(initial_info))
                     
-                    game_board.playablegrid = previous_board
                     game_board.counter = 0
+                    game_board.render_search(screen,grid_size, game_board.greedy_bfs_search(initial_info))
                     
-                    game_board.render_search(screen,grid_size, game_board.greedy_bfs_search())
+                    game_board.counter = 0
+                    game_board.render_search(screen,grid_size, game_board.weighted_a_star_search(initial_info))
 
                     game_board.render_end_grid(screen)
                     pg.display.flip()

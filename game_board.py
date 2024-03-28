@@ -327,6 +327,15 @@ class GameBoard:
                         queue.append(neighbor)
         return False
     
+    #Calculated the number of nun matching sets of 4 tiles between the current grid and the end grid
+    def calculate_unmatching_sets(self, grid):
+        unmatching_sets = 0
+        for i in range(self.grid_size - 1):
+            for j in range(self.grid_size - 1):
+                if grid[i][j] != self.endgrid[i][j] or grid[i][j+1] != self.endgrid[i][j+1] or grid[i+1][j] != self.endgrid[i+1][j] or grid[i+1][j+1] != self.endgrid[i+1][j+1]:
+                    unmatching_sets += 1
+        return unmatching_sets
+
     #Calculates the number of non matching tiles between the current grid and the end grid
     def calculate_unmatching_tiles(self, grid):
         unmatching_tiles = 0
@@ -335,14 +344,16 @@ class GameBoard:
                 if grid[i][j] != self.endgrid[i][j]:
                     unmatching_tiles += 1
         return unmatching_tiles
+    
+    def heuristic_search(self, grid):
+        return self.calculate_unmatching_tiles(grid) + self.calculate_unmatching_sets(grid)
 
-    def greedy_bfs_search(self):
+    def greedy_bfs_search(self, initial_info):
         print("Greedy BFS Search")
         visited = set()
         queue = []
         
-        initial_info = (0, 0, self.playablegrid, 0)
-        initial_priority = self.calculate_unmatching_tiles(self.playablegrid)
+        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
@@ -359,17 +370,17 @@ class GameBoard:
                 for neighbor in self.get_neighbors(current):
                     neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
                     if neighbor_state not in visited:
-                        priority = self.calculate_unmatching_tiles(neighbor[2])
+                        priority = self.heuristic_search(neighbor[2])
                         heapq.heappush(queue, (priority, neighbor))
         return None
 
-    def a_star_search(self):
+
+    def a_star_search(self, initial_info):
         print("A* Search")
         visited = set()
         queue = []
         
-        initial_info = (0, 0, self.playablegrid, 0)
-        initial_priority = self.calculate_unmatching_tiles(self.playablegrid)
+        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
@@ -386,7 +397,33 @@ class GameBoard:
                 for neighbor in self.get_neighbors(current):
                     neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
                     if neighbor_state not in visited:
-                        priority = self.calculate_unmatching_tiles(neighbor[2]) + neighbor[3]
+                        priority = self.heuristic_search(neighbor[2]) + neighbor[3]
                         heapq.heappush(queue, (priority, neighbor))
         return None
 
+
+    def weighted_a_star_search(self, initial_info):
+        print("Weighted A* Search")
+        visited = set()
+        queue = []
+
+        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
+        heapq.heappush(queue, (initial_priority, initial_info))
+        
+        while queue:
+            _, current = heapq.heappop(queue)
+            if self.search_end_condition_check(current[2]):
+                self.counter = current[3]
+                print("Counter: ", self.counter)
+                return current[2]
+            
+            x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
+            state = (x, y, grid)
+            if state not in visited:
+                visited.add(state)
+                for neighbor in self.get_neighbors(current):
+                    neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
+                    if neighbor_state not in visited:
+                        priority = (self.heuristic_search(neighbor[2]) * 1.3)  + neighbor[3]
+                        heapq.heappush(queue, (priority, neighbor))
+        return None

@@ -3,6 +3,7 @@ import pygame as pg
 import random
 import time
 from collections import deque
+from multiprocessing.pool import ThreadPool
 import heapq
 
 
@@ -24,6 +25,11 @@ class GameBoard:
 
         self.position = (0,0)
         self.color = [RED, BLUE, YELLOW]
+
+        self.displaying_hint = False
+        #self.pool = ThreadPool(processes=1)
+        #self.async_result = None
+        self.hint_path = None
 
     def render_position(self, screen):
         cell_width = 100
@@ -135,6 +141,12 @@ class GameBoard:
             pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
             self.render_position(screen)
 
+            #Caixa de texto a informar que precionando 'H' irá mostrar ajuda com o próximo movimento mais eficiente
+            font = pg.font.SysFont('Arial', 24)
+            hint_text = font.render("Press 'H' for hint", True, WHITE)
+            hint_rect = hint_text.get_rect(topleft=(10, 50))
+            screen.blit(hint_text, hint_rect)
+
     #Temporary function
     def render_search(self, screen, grid_size, grid):
         if grid_size == 4:
@@ -194,8 +206,34 @@ class GameBoard:
         counter_rect = counter_text.get_rect(topleft=(10, 10))
         screen.blit(counter_text, counter_rect)
 
+    def render_hint(self, screen):
+        if self.displaying_hint and self.hint_path is not None:
+            hint = self.hint_path[1]
+            font = pg.font.SysFont('Arial', 24)
+            hint_text = None
+            
+             #write text under the "Press 'H' for hint" text to show the hint
+            if self.position[0] == hint[0] and self.position[1] == hint[1] - 1:
+                hint_text = font.render("Hint: Move Down", True, WHITE)
+                hint_rect = hint_text.get_rect(topleft=(10, 100))
+            elif self.position[0] == hint[0] and self.position[1] == hint[1] + 1:
+                hint_text = font.render("Hint: Move Up", True, WHITE)
+                hint_rect = hint_text.get_rect(topleft=(10, 100))
+            elif self.position[0] == hint[0] - 1 and self.position[1] == hint[1]:
+                hint_text = font.render("Hint: Move Right", True, WHITE)
+                hint_rect = hint_text.get_rect(topleft=(10, 100))
+            elif self.position[0] == hint[0] + 1 and self.position[1] == hint[1]:
+                hint_text = font.render("Hint: Move Left", True, WHITE)
+                hint_rect = hint_text.get_rect(topleft=(10, 100))
+
+            screen.blit(hint_text, hint_rect)    
+
     def game_moves(self, event):
+
+        # Commented Lines that were supposed to incorporate multithreading for the search once every movement is done
+
         if event.type == pg.KEYDOWN:
+            self.displaying_hint = False
             x, y = self.position
             current_cell_color = self.playablegrid[y][x]
 
@@ -209,6 +247,17 @@ class GameBoard:
                 new_position = (x - 1, y)
             elif event.key == pg.K_RIGHT and x < self.grid_size - 1:
                 new_position = (x + 1, y)
+            elif event.key == pg.K_h:
+                self.displaying_hint = True
+                #if self.hint_path is not None: # and self.hint_path[1][3] == self.playablegrid:
+                #    self.hint_path.pop(0)
+                #    return
+                #else:
+                #    print("Searching for hint...")
+                info = (self.position[0], self.position[1], self.playablegrid, 0, None)
+                #self.hint_path = self.async_result.get()
+                self.hint_path = self.get_hint_movement(info)
+                return
 
             if new_position:
                 new_x, new_y = new_position
@@ -222,6 +271,20 @@ class GameBoard:
                         self.playablegrid[new_y][new_x] = self.get_transformed_color(current_cell_color, destination_color)
                         self.position = new_position 
                         self.move_counter()
+                
+            '''
+            if self.hint_path is not None and self.hint_path[1][3] == self.playablegrid:
+                # Remove first node from hint_path so that the next node can be displayed 
+                # as the new hint in case of a movement being done according to the previous hint
+                self.hint_path.pop(0)
+
+            else:
+                info = (self.position[0], self.position[1], self.playablegrid.copy, self.counter, None)
+                # Need to cancel stop altogether the async execution in case a movement is done while the search is running
+                self.pool.terminate()
+                self.pool = ThreadPool(processes=1)
+                self.async_result = self.pool.apply_async(self.get_hint_movement, (info,))
+            '''
 
     def get_transformed_color(self, current_color, destination_color):
         for color in self.color:
@@ -251,36 +314,36 @@ class GameBoard:
         current_cell_color = grid[y][x]
         neighbors = []
         if x > 0:
-            destination_color =  grid[x-1][y]
+            destination_color =  grid[y][x-1]
             if destination_color == current_cell_color:
                 neighbors.append((x - 1, y, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
-                new_grid[x-1][y] = self.get_transformed_color(current_cell_color, destination_color)
+                new_grid[y][x-1] = self.get_transformed_color(current_cell_color, destination_color)
                 neighbors.append((x - 1, y, new_grid, counter + 1, parent))
         if x < len(self.playablegrid) - 1:
-            destination_color = grid[x+1][y]
+            destination_color = grid[y][x+1]
             if destination_color == current_cell_color:
                 neighbors.append((x + 1, y, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
-                new_grid[x+1][y] = self.get_transformed_color(current_cell_color, destination_color)
+                new_grid[y][x+1] = self.get_transformed_color(current_cell_color, destination_color)
                 neighbors.append((x + 1, y, new_grid, counter + 1, parent))
         if y > 0:
-            destination_color = grid[x][y-1]
+            destination_color = grid[y-1][x]
             if destination_color == current_cell_color:
                 neighbors.append((x, y - 1, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
-                new_grid[x][y-1] = self.get_transformed_color(current_cell_color, destination_color)
+                new_grid[y-1][x] = self.get_transformed_color(current_cell_color, destination_color)
                 neighbors.append((x, y - 1, new_grid, counter + 1, parent))
         if y < len(self.playablegrid) - 1:
-            destination_color = grid[x][y+1]
+            destination_color = grid[y+1][x]
             if destination_color == current_cell_color:
                 neighbors.append((x, y + 1, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
-                new_grid[x][y+1] = self.get_transformed_color(current_cell_color, destination_color)
+                new_grid[y+1][x] = self.get_transformed_color(current_cell_color, destination_color)
                 neighbors.append((x, y + 1, new_grid, counter + 1, parent))
         return neighbors
     
@@ -338,14 +401,13 @@ class GameBoard:
         visited = set()
         queue = []
         
-        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
+        initial_priority = self.heuristic_search(initial_info[2])
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
             _, current = heapq.heappop(queue)
             if self.search_end_condition_check(current[2]):
-                self.counter = current[3]
-                print("Counter: ", self.counter)
+                print("Counter: ", current[3])
                 return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
@@ -364,14 +426,13 @@ class GameBoard:
         visited = set()
         queue = []
         
-        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
+        initial_priority = self.heuristic_search(initial_info[2])
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
             _, current = heapq.heappop(queue)
             if self.search_end_condition_check(current[2]):
-                self.counter = current[3]
-                print("Counter: ", self.counter)
+                print("Counter: ", current[3])
                 return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
@@ -390,14 +451,13 @@ class GameBoard:
         visited = set()
         queue = []
 
-        initial_priority = self.calculate_unmatching_tiles(initial_info[2])
+        initial_priority = self.heuristic_search(initial_info[2])
         heapq.heappush(queue, (initial_priority, initial_info))
         
         while queue:
             _, current = heapq.heappop(queue)
             if self.search_end_condition_check(current[2]):
-                self.counter = current[3]
-                print("Counter: ", self.counter)
+                print("Counter: ", current[3])
                 return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
@@ -425,3 +485,7 @@ class GameBoard:
             for row in path[i][2]:
                 print(row)
             print("\n\n")
+
+    def get_hint_movement(self, initial_info):
+        result = self.weighted_a_star_search(initial_info)
+        return self.construct_path(result)

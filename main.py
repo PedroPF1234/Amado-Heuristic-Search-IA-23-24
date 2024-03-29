@@ -75,14 +75,11 @@ def handle_events():
                     print("\n\n\n")
                     print("Searching for solution...")
                     game_board.a_star_search(initial_info)
-                    
-                    game_board.counter = 0
                     game_board.greedy_bfs_search(initial_info)
-                    
-                    game_board.counter = 0
-                    path = game_board.construct_path(game_board.weighted_a_star_search(initial_info))
+                    node = game_board.weighted_a_star_search(initial_info)
+                    path = game_board.construct_path(node)
 
-                    game_board.print_path(path)
+                    game_board.counter = node[3]
 
                     state = END_GAME
                     game_board.stop_timer()
@@ -138,4 +135,5 @@ while True:
             game_board.render_end_grid(screen)
             game_board.render_move_counter(screen)
             game_board.render_clock(screen)
+            game_board.render_hint(screen)
     pg.display.flip()

@@ -69,21 +69,21 @@ def handle_events():
                 elif event.key == pg.K_2:
                     state = SEARCH_PLAYING
                     game_board.reset_game_state()
-                    initial_info = (0, 0, game_board.playablegrid, 0)
+                    initial_info = (0, 0, game_board.playablegrid, 0, None)
                     game_board.start_timer()
                     
+                    print("\n\n\n")
                     print("Searching for solution...")
-                    game_board.render_search(screen,grid_size, game_board.a_star_search(initial_info))
+                    game_board.a_star_search(initial_info)
                     
                     game_board.counter = 0
-                    game_board.render_search(screen,grid_size, game_board.greedy_bfs_search(initial_info))
+                    game_board.greedy_bfs_search(initial_info)
                     
                     game_board.counter = 0
-                    game_board.render_search(screen,grid_size, game_board.weighted_a_star_search(initial_info))
+                    path = game_board.construct_path(game_board.weighted_a_star_search(initial_info))
 
-                    game_board.render_end_grid(screen)
-                    pg.display.flip()
-                    time.sleep(10)
+                    game_board.print_path(path)
+
                     state = END_GAME
                     game_board.stop_timer()
                     #else:
@@ -108,8 +108,6 @@ def handle_events():
             elif state == SEARCH_PLAYING:
                 if event.key == pg.K_ESCAPE:
                     state = MENU 
-
-
 
 
 while True:

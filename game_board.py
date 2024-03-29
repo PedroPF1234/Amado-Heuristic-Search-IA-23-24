@@ -25,8 +25,6 @@ class GameBoard:
         self.position = (0,0)
         self.color = [RED, BLUE, YELLOW]
 
-
-
     def render_position(self, screen):
         cell_width = 100
         cell_height = 50
@@ -38,7 +36,6 @@ class GameBoard:
         position_y = start_y + self.position[1] * (cell_height + border_width)
         
         pg.draw.rect(screen, (255, 165, 0), (position_x, position_y, cell_width, cell_height), 2)
-
 
     def start_timer(self):
         self.start_time = time.time()
@@ -69,12 +66,9 @@ class GameBoard:
         clock_rect = clock_text.get_rect(topright=(self.width - 10, 10))
         screen.blit(clock_text, clock_rect)
 
-
     def move_counter(self):
         #Basicamente contar os presses de arrow keys codigo missing
         self.counter +=1
-
-
 
     def generate_end_grid(self):
         total_cells = self.grid_size ** 2
@@ -94,7 +88,6 @@ class GameBoard:
             solution_board.append(row)
         return solution_board
         
-
     def generate_random_grid(self, grid_size):
         total_cells = grid_size ** 2
         colors = [RED] * (total_cells // 3) + [BLUE] * (total_cells // 3) + [YELLOW] * (total_cells // 3)
@@ -111,7 +104,6 @@ class GameBoard:
                 row.append(color)
             grid.append(row)
         return grid
-
 
     def render(self, screen, grid_size):
         if grid_size == 4:
@@ -202,7 +194,6 @@ class GameBoard:
         counter_rect = counter_text.get_rect(topleft=(10, 10))
         screen.blit(counter_text, counter_rect)
 
-
     def game_moves(self, event):
         if event.type == pg.KEYDOWN:
             x, y = self.position
@@ -232,16 +223,11 @@ class GameBoard:
                         self.position = new_position 
                         self.move_counter()
 
-
-
-
     def get_transformed_color(self, current_color, destination_color):
         for color in self.color:
             if color != current_color and color != destination_color:
                 return color
         return current_color
-
-
 
     def end_condition_check(self):
         for i in range(self.grid_size):
@@ -250,7 +236,6 @@ class GameBoard:
                     return False  
         return True
     
-
     def reset_game_state(self):
         self.playablegrid = self.generate_random_grid(self.grid_size)
         self.endgrid = self.generate_end_grid()
@@ -260,43 +245,43 @@ class GameBoard:
 
         self.position = (0, 0)
 
-
     def get_neighbors(self, info):
-        x, y, grid, counter = info
+        parent = (info[0], info[1], tuple(map(tuple, info[2])), info[3], info[4])
+        x, y, grid, counter, _ = info
         current_cell_color = grid[y][x]
         neighbors = []
         if x > 0:
             destination_color =  grid[x-1][y]
             if destination_color == current_cell_color:
-                neighbors.append((x - 1, y, grid, counter + 1))
+                neighbors.append((x - 1, y, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
                 new_grid[x-1][y] = self.get_transformed_color(current_cell_color, destination_color)
-                neighbors.append((x - 1, y, new_grid, counter + 1))
+                neighbors.append((x - 1, y, new_grid, counter + 1, parent))
         if x < len(self.playablegrid) - 1:
             destination_color = grid[x+1][y]
             if destination_color == current_cell_color:
-                neighbors.append((x + 1, y, grid, counter + 1))
+                neighbors.append((x + 1, y, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
                 new_grid[x+1][y] = self.get_transformed_color(current_cell_color, destination_color)
-                neighbors.append((x + 1, y, new_grid, counter + 1))
+                neighbors.append((x + 1, y, new_grid, counter + 1, parent))
         if y > 0:
             destination_color = grid[x][y-1]
             if destination_color == current_cell_color:
-                neighbors.append((x, y - 1, grid, counter + 1))
+                neighbors.append((x, y - 1, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
                 new_grid[x][y-1] = self.get_transformed_color(current_cell_color, destination_color)
-                neighbors.append((x, y - 1, new_grid, counter + 1))
+                neighbors.append((x, y - 1, new_grid, counter + 1, parent))
         if y < len(self.playablegrid) - 1:
             destination_color = grid[x][y+1]
             if destination_color == current_cell_color:
-                neighbors.append((x, y + 1, grid, counter + 1))
+                neighbors.append((x, y + 1, grid, counter + 1, parent))
             else:
                 new_grid = [row[:] for row in grid]
                 new_grid[x][y+1] = self.get_transformed_color(current_cell_color, destination_color)
-                neighbors.append((x, y + 1, new_grid, counter + 1))
+                neighbors.append((x, y + 1, new_grid, counter + 1, parent))
         return neighbors
     
     def search_end_condition_check(self, grid):
@@ -315,7 +300,7 @@ class GameBoard:
         while queue:
             current = queue.popleft()
             if self.search_end_condition_check(current[2]):
-                return True
+                return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
@@ -325,7 +310,7 @@ class GameBoard:
                     neighbor_ = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
                     if neighbor_ not in visited:
                         queue.append(neighbor)
-        return False
+        return None
     
     #Calculated the number of nun matching sets of 4 tiles between the current grid and the end grid
     def calculate_unmatching_sets(self, grid):
@@ -361,7 +346,7 @@ class GameBoard:
             if self.search_end_condition_check(current[2]):
                 self.counter = current[3]
                 print("Counter: ", self.counter)
-                return current[2]
+                return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
@@ -373,7 +358,6 @@ class GameBoard:
                         priority = self.heuristic_search(neighbor[2])
                         heapq.heappush(queue, (priority, neighbor))
         return None
-
 
     def a_star_search(self, initial_info):
         print("A* Search")
@@ -388,7 +372,7 @@ class GameBoard:
             if self.search_end_condition_check(current[2]):
                 self.counter = current[3]
                 print("Counter: ", self.counter)
-                return current[2]
+                return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
@@ -400,7 +384,6 @@ class GameBoard:
                         priority = self.heuristic_search(neighbor[2]) + neighbor[3]
                         heapq.heappush(queue, (priority, neighbor))
         return None
-
 
     def weighted_a_star_search(self, initial_info):
         print("Weighted A* Search")
@@ -415,7 +398,7 @@ class GameBoard:
             if self.search_end_condition_check(current[2]):
                 self.counter = current[3]
                 print("Counter: ", self.counter)
-                return current[2]
+                return current
             
             x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
             state = (x, y, grid)
@@ -427,3 +410,18 @@ class GameBoard:
                         priority = (self.heuristic_search(neighbor[2]) * 1.3)  + neighbor[3]
                         heapq.heappush(queue, (priority, neighbor))
         return None
+    
+    def construct_path(self, current):
+        path = []
+        while current:
+            path.append(current)
+            current = current[4]
+        return path[::-1]
+    
+    def print_path(self, path):
+        for i in range(len(path)):
+            print("Step: ", i)
+            print("Position: ", path[i][0], path[i][1])
+            for row in path[i][2]:
+                print(row)
+            print("\n\n")

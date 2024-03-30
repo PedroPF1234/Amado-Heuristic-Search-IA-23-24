@@ -493,14 +493,14 @@ class GameBoard:
                             stack.append(neighbor)
         return None
     
-    def iterative_deepening_search(self, initial_info):
+    def iterative_deepening_search(self, initial_info, depth):
         print("Iterative Deepening Search")
-        depth = 0
-        while True:
-            result = self.basic_dfs_search(initial_info, depth)
+        initial_depth = 1
+        while initial_depth <= depth:
+            result = self.basic_dfs_search(initial_info, initial_depth)
             if result:
                 return result
-            depth += 1
+            initial_depth += 1
 
     def construct_path(self, current):
         path = []

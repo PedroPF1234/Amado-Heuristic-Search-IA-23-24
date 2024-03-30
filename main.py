@@ -78,7 +78,7 @@ def handle_events():
                     game_board.greedy_bfs_search(initial_info)
                     node = game_board.weighted_a_star_search(initial_info)
                     
-                    game_board.basic_dfs_search(initial_info)
+                    game_board.iterative_deepening_search(initial_info, 37)
 
 
                     game_board.counter = node[3]

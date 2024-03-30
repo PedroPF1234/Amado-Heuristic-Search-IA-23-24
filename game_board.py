@@ -32,8 +32,8 @@ class GameBoard:
         self.hint_path = None
 
     def render_position(self, screen):
-        cell_width = 100
-        cell_height = 50
+        cell_width = 400 // self.grid_size
+        cell_height = 200 // self.grid_size
         border_width = 2 
         start_x = 75
         start_y = 275
@@ -41,7 +41,7 @@ class GameBoard:
         position_x = start_x + self.position[0] * (cell_width + border_width)
         position_y = start_y + self.position[1] * (cell_height + border_width)
         
-        pg.draw.rect(screen, (255, 165, 0), (position_x, position_y, cell_width, cell_height), 2)
+        pg.draw.rect(screen, (0, 0, 0), (position_x, position_y, cell_width, cell_height), 2)
 
     def start_timer(self):
         self.start_time = time.time()
@@ -112,40 +112,39 @@ class GameBoard:
         return grid
 
     def render(self, screen, grid_size):
-        if grid_size == 4:
-            cell_width = 100
-            cell_height = 50
-            border_width = 2 
+        cell_width = 400 // grid_size
+        cell_height = 200 // grid_size
+        border_width = 2 
 
-            start_x = 75  #Horizontal
-            start_y = 275  #Vertical
+        start_x = 75  #Horizontal
+        start_y = 275  #Vertical
 
-            for row in range(self.grid_size):
-                for col in range(self.grid_size):
-                    cell_color = self.playablegrid[row][col]
-                    cell_x = start_x + col * (cell_width + border_width)  
-                    cell_y = start_y + row * (cell_height + border_width)  
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                cell_color = self.playablegrid[row][col]
+                cell_x = start_x + col * (cell_width + border_width)  
+                cell_y = start_y + row * (cell_height + border_width)  
 
 
-                    cell_rect = pg.Rect(cell_x, cell_y, cell_width, cell_height) 
-                    pg.draw.rect(screen, (255, 255, 255), cell_rect) # Pygame desenhar bordas
-                    cell_inner_rect = pg.Rect(cell_x + border_width // 2, cell_y + border_width // 2,
-                                            cell_width - border_width, cell_height - border_width)
-                    pg.draw.rect(screen, cell_color, cell_inner_rect)
+                cell_rect = pg.Rect(cell_x, cell_y, cell_width, cell_height) 
+                pg.draw.rect(screen, (255, 255, 255), cell_rect) # Pygame desenhar bordas
+                cell_inner_rect = pg.Rect(cell_x + border_width // 2, cell_y + border_width // 2,
+                                        cell_width - border_width, cell_height - border_width)
+                pg.draw.rect(screen, cell_color, cell_inner_rect)
 
-            #Separador do amado
-            vertical_bar_width = 10
-            vertical_bar_height = 600
-            vertical_bar_x = 500
-            vertical_bar_y = 0
-            pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
-            self.render_position(screen)
+        #Separador do amado
+        vertical_bar_width = 10
+        vertical_bar_height = 600
+        vertical_bar_x = 500
+        vertical_bar_y = 0
+        pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
+        self.render_position(screen)
 
-            #Caixa de texto a informar que precionando 'H' irá mostrar ajuda com o próximo movimento mais eficiente
-            font = pg.font.SysFont('Arial', 24)
-            hint_text = font.render("Press 'H' for hint", True, WHITE)
-            hint_rect = hint_text.get_rect(topleft=(10, 50))
-            screen.blit(hint_text, hint_rect)
+        #Caixa de texto a informar que precionando 'H' irá mostrar ajuda com o próximo movimento mais eficiente
+        font = pg.font.SysFont('Arial', 24)
+        hint_text = font.render("Press 'H' for hint", True, WHITE)
+        hint_rect = hint_text.get_rect(topleft=(10, 50))
+        screen.blit(hint_text, hint_rect)
 
     #Temporary function
     def render_search(self, screen, grid_size, grid):
@@ -179,26 +178,25 @@ class GameBoard:
             self.render_position(screen)
 
     def render_end_grid(self, screen):
-        if self.grid_size == 4:
-            cell_width = 50
-            cell_height = 30
-            border_width = 2
+        cell_width = 200 // self.grid_size
+        cell_height = 120 // self.grid_size
+        border_width = 2
 
-            start_x = 550
-            start_y = 150
+        start_x = 550
+        start_y = 150
 
-            for row in range(self.grid_size):
-                for col in range(self.grid_size):
-                    cell_color = self.endgrid[row][col]  
-                    cell_x = start_x + col * (cell_width + border_width)
-                    cell_y = start_y + row * (cell_height + border_width)
+        for row in range(self.grid_size):
+            for col in range(self.grid_size):
+                cell_color = self.endgrid[row][col]  
+                cell_x = start_x + col * (cell_width + border_width)
+                cell_y = start_y + row * (cell_height + border_width)
 
 
-                    cell_rect = pg.Rect(cell_x, cell_y, cell_width, cell_height)
-                    pg.draw.rect(screen, (255, 255, 255), cell_rect)
-                    cell_inner_rect = pg.Rect(cell_x + border_width // 2, cell_y + border_width // 2,
-                                            cell_width - border_width, cell_height - border_width)
-                    pg.draw.rect(screen, cell_color, cell_inner_rect)
+                cell_rect = pg.Rect(cell_x, cell_y, cell_width, cell_height)
+                pg.draw.rect(screen, (255, 255, 255), cell_rect)
+                cell_inner_rect = pg.Rect(cell_x + border_width // 2, cell_y + border_width // 2,
+                                        cell_width - border_width, cell_height - border_width)
+                pg.draw.rect(screen, cell_color, cell_inner_rect)
 
     def render_move_counter(self,screen):
         font = pg.font.SysFont('Arial', 24)
@@ -249,15 +247,16 @@ class GameBoard:
                 new_position = (x + 1, y)
             elif event.key == pg.K_h:
                 self.displaying_hint = True
-                #if self.hint_path is not None: # and self.hint_path[1][3] == self.playablegrid:
-                #    self.hint_path.pop(0)
-                #    return
-                #else:
-                #    print("Searching for hint...")
-                info = (self.position[0], self.position[1], self.playablegrid, 0, None)
-                #self.hint_path = self.async_result.get()
-                self.hint_path = self.get_hint_movement(info)
-                return
+                if self.hint_path is not None and self.hint_path[1][2] == tuple(map(tuple, self.playablegrid)):
+                    self.hint_path.pop(0)
+                    return
+                else:
+                    print("Searching for hint...")
+                    self.hint_path = None
+                    info = (self.position[0], self.position[1], self.playablegrid, 0, None)
+                    #self.hint_path = self.async_result.get()
+                    self.hint_path = self.get_hint_movement(info)
+                    return
 
             if new_position:
                 new_x, new_y = new_position

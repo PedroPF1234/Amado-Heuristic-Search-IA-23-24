@@ -471,6 +471,37 @@ class GameBoard:
                         heapq.heappush(queue, (priority, neighbor))
         return None
     
+    def basic_dfs_search(self, initial_info, depth=0):
+        print("Basic DFS Search")
+        stack = []
+        visited = set()
+        stack.append(initial_info)
+        
+        while stack:
+            current = stack.pop()
+            if self.search_end_condition_check(current[2]):
+                return current
+            
+            x, y, grid = current[0], current[1], tuple(map(tuple, current[2]))
+            state = (x, y, grid)
+            if state not in visited:
+                visited.add(state)
+                if depth == 0 or current[3] < depth:
+                    for neighbor in self.get_neighbors(current):
+                        neighbor_state = (neighbor[0], neighbor[1], tuple(map(tuple, neighbor[2])))
+                        if neighbor_state not in visited:
+                            stack.append(neighbor)
+        return None
+    
+    def iterative_deepening_search(self, initial_info):
+        print("Iterative Deepening Search")
+        depth = 0
+        while True:
+            result = self.basic_dfs_search(initial_info, depth)
+            if result:
+                return result
+            depth += 1
+
     def construct_path(self, current):
         path = []
         while current:

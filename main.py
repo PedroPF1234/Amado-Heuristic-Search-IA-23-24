@@ -77,7 +77,9 @@ def handle_events():
                     game_board.a_star_search(initial_info)
                     game_board.greedy_bfs_search(initial_info)
                     node = game_board.weighted_a_star_search(initial_info)
-                    path = game_board.construct_path(node)
+                    
+                    game_board.basic_dfs_search(initial_info)
+
 
                     game_board.counter = node[3]
 

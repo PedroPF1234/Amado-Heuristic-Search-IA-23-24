@@ -87,7 +87,7 @@ def handle_events():
                     game_board.greedy_bfs_search(initial_info)
                     node = game_board.weighted_a_star_search(initial_info)
                     
-                    game_board.iterative_deepening_search(initial_info, 37)
+                   # game_board.iterative_deepening_search(initial_info, 20)
 
 
                     game_board.counter = node[3]
@@ -153,7 +153,7 @@ while True:
                 sys.exit()
         end_state.render_end_screen(screen, game_board.counter, game_board.get_elapsed_time())
     else:
-        handle_events()  # Handle events for other states
+        handle_events()  
         screen.fill(BLACK)
         if state == INTRO:
             screen.blit(intro_image, (0, 0))

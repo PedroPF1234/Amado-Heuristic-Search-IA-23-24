@@ -140,13 +140,12 @@ class GameBoard:
         pg.draw.rect(screen, (255, 255, 0), (vertical_bar_x, vertical_bar_y, vertical_bar_width, vertical_bar_height))
         self.render_position(screen)
 
-        #Caixa de texto a informar que precionando 'H' irá mostrar ajuda com o próximo movimento mais eficiente
         font = pg.font.SysFont('Arial', 24)
         hint_text = font.render("Press 'H' for hint", True, WHITE)
         hint_rect = hint_text.get_rect(topleft=(10, 50))
         screen.blit(hint_text, hint_rect)
 
-    #Temporary function
+
     def render_search(self, screen, grid_size, grid):
         if grid_size == 4:
             cell_width = 100
@@ -210,7 +209,7 @@ class GameBoard:
             font = pg.font.SysFont('Arial', 24)
             hint_text = None
             
-             #write text under the "Press 'H' for hint" text to show the hint
+
             if self.position[0] == hint[0] and self.position[1] == hint[1] - 1:
                 hint_text = font.render("Hint: Move Down", True, WHITE)
                 hint_rect = hint_text.get_rect(topleft=(10, 100))
@@ -228,7 +227,6 @@ class GameBoard:
 
     def game_moves(self, event):
 
-        # Commented Lines that were supposed to incorporate multithreading for the search once every movement is done
 
         if event.type == pg.KEYDOWN:
             self.displaying_hint = False
@@ -273,13 +271,10 @@ class GameBoard:
                 
             '''
             if self.hint_path is not None and self.hint_path[1][3] == self.playablegrid:
-                # Remove first node from hint_path so that the next node can be displayed 
-                # as the new hint in case of a movement being done according to the previous hint
                 self.hint_path.pop(0)
 
             else:
                 info = (self.position[0], self.position[1], self.playablegrid.copy, self.counter, None)
-                # Need to cancel stop altogether the async execution in case a movement is done while the search is running
                 self.pool.terminate()
                 self.pool = ThreadPool(processes=1)
                 self.async_result = self.pool.apply_async(self.get_hint_movement, (info,))
@@ -374,7 +369,6 @@ class GameBoard:
                         queue.append(neighbor)
         return None
     
-    #Calculated the number of nun matching sets of 4 tiles between the current grid and the end grid
     def calculate_unmatching_sets(self, grid):
         unmatching_sets = 0
         for i in range(self.grid_size - 1):
@@ -383,7 +377,6 @@ class GameBoard:
                     unmatching_sets += 1
         return unmatching_sets
 
-    #Calculates the number of non matching tiles between the current grid and the end grid
     def calculate_unmatching_tiles(self, grid):
         unmatching_tiles = 0
         for i in range(self.grid_size):
